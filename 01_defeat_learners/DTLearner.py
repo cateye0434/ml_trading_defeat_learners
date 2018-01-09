@@ -1,34 +1,84 @@
 """A simple wrapper for Decision Tree regression"""
 
 import numpy as np
+import pandas as pd
+from scipy.stats import pearsonr
+from copy import deepcopy
 
-class LinRegLearner(object):
+
+class DTLearner(object):
 
     def __init__(self, verbose = False):
         pass
+        
+
+    def __build_tree(self, dataX, dataY):
+        """Builds the Decision Tree recursively by choosing the best feature to split on and 
+        the splitting value. The best feature has the highest absolute correlation with dataY. 
+        If all features have the same absolute correlation, choose the first feature. 
+        The splitting value is the median of the data according to the best feature
+
+        Parameters:
+        dataX: An ndarray of X values at each node
+        dataY: A 1D array of Y training values at each node
+        
+        Returns:
+        tree: A decision tree in the form of an ndarray
+        """
+        # Get the number of samples (rows) and features (columns) of dataX
+        num_samples = dataX.shape[0]
+        num_feats = dataX.shape[1]
+
+        # If there are <= leaf_size samples or all data in dataY are the same, return leaf
+        if num_samples <= self.leaf_size or len(pd.unique(dataY)) == 1:
+            return np.array([-1, dataY.mean(), np.nan, np.nan])
+        else:
+            # Initialize best feature index and best feature correlation
+            best_feat_i = 0
+            best_abs_corr = 0.0
+
+            # Determine best feature to split on, using correlation between features and dataY
+            for feat_i in range(num_feats):
+                abs_corr = abs(pearsonr(dataX[:, feat_i], dataY)[0])
+                if abs_corr > best_abs_corr:
+                    best_abs_corr = abs_corr
+                    best_feat_i = feat_i
+            
+            # Split the data according to the best feature
+            split_val = np.median(dataX[:, best_feat_i])
+
+            # Logical arrays for indexing
+            left_index = dataX[:, best_feat_i] <= split_val
+            right_index = dataX[:, best_feat_i] > split_val
+
+            # Build left and right branches and the root
+            lefttree = self.__build_tree(dataX[left_index], dataY[left_index])
+            righttree = self.__build_tree(dataX[right_index], dataY[right_index])
+
+            # Set the starting row for the right subtree of the current root
+            if lefttree.ndim == 1:
+                righttree_start = 2 # The right subtree starts 2 rows down
+            elif lefttree.ndim > 1:
+                righttree_start = lefttree.shape[0] + 1
+            root = np.array([best_feat_i, split_val, 1, righttree_start])
+
+            return np.vstack((root, lefttree, righttree))
+        
 
     def addEvidence(self, dataX, dataY):
-        """Add training data to learner
-        Parameters:
-        dataX: X values of data to add
-        dataY: The Y training values
-        """
-
-        # Add 1s column so linear regression finds a constant term
-        newdataX = np.ones([dataX.shape[0], dataX.shape[1] + 1])
-        newdataX[:,0:dataX.shape[1]] = dataX
-
-        # build and save the model
-        self.model_coefs, residuals, rank, s = np.linalg.lstsq(newdataX, dataY)
+        pass
+        
         
     def query(self, points):
         """Estimate a set of test points given the model we built
+        
         Parameters:
         points: A numpy array with each row corresponding to a specific query
 
         Returns: the estimated values according to the saved model
         """
-        return (self.model_coefs[:-1] * points).sum(axis=1) + self.model_coefs[-1]
+        pass
+
 
 if __name__=="__main__":
     print ("This is a Decision Tree Learner")
