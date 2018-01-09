@@ -8,8 +8,12 @@ from copy import deepcopy
 
 class DTLearner(object):
 
-    def __init__(self, verbose = False):
-        pass
+    def __init__(self, leaf_size=1, verbose=False, tree=None):
+        self.leaf_size = leaf_size
+        self.verbose = verbose
+        self.tree = deepcopy(tree)
+        if verbose:
+            self.get_learner_info()
         
 
     def __build_tree(self, dataX, dataY):
