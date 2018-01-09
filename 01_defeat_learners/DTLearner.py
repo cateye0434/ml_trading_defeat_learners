@@ -79,6 +79,16 @@ class DTLearner(object):
         """
         pass
 
+        
+    def get_learner_info(self):
+        print ("Info about this Decision Tree Learner:")
+        print ("leaf_size =", self.leaf_size)
+        if self.tree is not None:
+            print ("tree shape =", self.tree.shape)
+            print ("tree as a numpy ndarray: \n", self.tree)
+        else:
+            print ("Tree has no data")
+
 
 if __name__=="__main__":
     print ("This is a Decision Tree Learner")
