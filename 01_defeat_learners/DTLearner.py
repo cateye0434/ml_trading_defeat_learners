@@ -23,11 +23,14 @@ class DTLearner(object):
         The splitting value is the median of the data according to the best feature
 
         Parameters:
-        dataX: An ndarray of X values at each node
-        dataY: A 1D array of Y training values at each node
+        dataX: A numpy ndarray of X values at each node
+        dataY: A numpy 1D array of Y training values at each node
         
         Returns:
-        tree: A decision tree in the form of an ndarray
+        tree: A numpy ndarray. Each row represents a node and four columns are feature indices 
+        (int type; index for a leaf is -1), splitting values, and starting rows, from the current 
+        root, for its left and right subtrees (if any)
+
         """
         # Get the number of samples (rows) and features (columns) of dataX
         num_samples = dataX.shape[0]
@@ -69,14 +72,44 @@ class DTLearner(object):
             return np.vstack((root, lefttree, righttree))
         
 
+    def __tree_search(self, point, row):
+            """A private function to be used with query. It recursively searches 
+            the decision tree matrix and returns a predicted value for point
+
+            Parameters:
+            point: A numpy 1D array of test query
+            row: The row of the decision tree matrix to search
+        
+            Returns 
+            pred: The predicted value
+            """
+
+            # Get the feature on the row and its corresponding splitting value
+            feat, split_val = self.tree[row, 0:2]
+            
+            # If splitting value of feature is -1, we have reached a leaf so return it
+            if feat == -1:
+                return split_val
+
+            # If the corresponding feature's value from point <= split_val, go to the left tree
+            elif point[int(feat)] <= split_val:
+                pred = self.__tree_search(point, row + int(self.tree[row, 2]))
+
+            # Otherwise, go to the right tree
+            else:
+                pred = self.__tree_search(point, row + int(self.tree[row, 3]))
+            
+            return pred
+
+
     def addEvidence(self, dataX, dataY):
         """Add training data to learner
 
         Parameters:
-        dataX: An ndarray of X values of data to add
-        dataY: A 1D array of Y training values
+        dataX: A numpy ndarray of X values of data to add
+        dataY: A numpy 1D array of Y training values
 
-        Returns: An updated tree for DTLearner
+        Returns: An updated tree matrix for DTLearner
         """
 
         new_tree = self.__build_tree(dataX, dataY)
@@ -97,6 +130,7 @@ class DTLearner(object):
         Parameters:
         points: A numpy array with each row corresponding to a specific query
         Returns: the estimated values according to the saved model
+
         """
         pass
 
