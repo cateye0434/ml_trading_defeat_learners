@@ -70,7 +70,25 @@ class DTLearner(object):
         
 
     def addEvidence(self, dataX, dataY):
-        pass
+        """Add training data to learner
+
+        Parameters:
+        dataX: An ndarray of X values of data to add
+        dataY: A 1D array of Y training values
+
+        Returns: An updated tree for DTLearner
+        """
+
+        new_tree = self.__build_tree(dataX, dataY)
+        # If self.tree is currently None, simply new_tree to it
+        if self.tree is None:
+            self.tree = new_tree
+        # Otherwise, add the data to the self.tree
+        else:
+            self.tree = np.vstack((self.tree, new_tree))
+        
+        if self.verbose:
+            self.get_learner_info()
         
         
     def query(self, points):
