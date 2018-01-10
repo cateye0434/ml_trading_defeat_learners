@@ -73,33 +73,33 @@ class DTLearner(object):
         
 
     def __tree_search(self, point, row):
-            """A private function to be used with query. It recursively searches 
-            the decision tree matrix and returns a predicted value for point
+        """A private function to be used with query. It recursively searches 
+        the decision tree matrix and returns a predicted value for point
 
-            Parameters:
-            point: A numpy 1D array of test query
-            row: The row of the decision tree matrix to search
+        Parameters:
+        point: A numpy 1D array of test query
+        row: The row of the decision tree matrix to search
+    
+        Returns 
+        pred: The predicted value
+        """
+
+        # Get the feature on the row and its corresponding splitting value
+        feat, split_val = self.tree[row, 0:2]
         
-            Returns 
-            pred: The predicted value
-            """
+        # If splitting value of feature is -1, we have reached a leaf so return it
+        if feat == -1:
+            return split_val
 
-            # Get the feature on the row and its corresponding splitting value
-            feat, split_val = self.tree[row, 0:2]
-            
-            # If splitting value of feature is -1, we have reached a leaf so return it
-            if feat == -1:
-                return split_val
+        # If the corresponding feature's value from point <= split_val, go to the left tree
+        elif point[int(feat)] <= split_val:
+            pred = self.__tree_search(point, row + int(self.tree[row, 2]))
 
-            # If the corresponding feature's value from point <= split_val, go to the left tree
-            elif point[int(feat)] <= split_val:
-                pred = self.__tree_search(point, row + int(self.tree[row, 2]))
-
-            # Otherwise, go to the right tree
-            else:
-                pred = self.__tree_search(point, row + int(self.tree[row, 3]))
-            
-            return pred
+        # Otherwise, go to the right tree
+        else:
+            pred = self.__tree_search(point, row + int(self.tree[row, 3]))
+        
+        return pred
 
 
     def addEvidence(self, dataX, dataY):
@@ -113,10 +113,12 @@ class DTLearner(object):
         """
 
         new_tree = self.__build_tree(dataX, dataY)
-        # If self.tree is currently None, simply new_tree to it
+
+        # If self.tree is currently None, simply assign new_tree to it
         if self.tree is None:
             self.tree = new_tree
-        # Otherwise, add the data to the self.tree
+
+        # Otherwise, append new_tree to self.tree
         else:
             self.tree = np.vstack((self.tree, new_tree))
         
@@ -125,14 +127,19 @@ class DTLearner(object):
         
         
     def query(self, points):
-        """Estimate a set of test points given the model we built
+        """Estimates a set of test points given the model we built
         
         Parameters:
-        points: A numpy array with each row corresponding to a specific query
-        Returns: the estimated values according to the saved model
+        points: A numpy ndarray of test queries
 
+        Returns: 
+        preds: A numpy 1D array of the estimated values
         """
-        pass
+
+        preds = []
+        for point in points:
+            preds.append(self.__tree_search(point, row=0))
+        return np.asarray(preds)
 
 
     def get_learner_info(self):
