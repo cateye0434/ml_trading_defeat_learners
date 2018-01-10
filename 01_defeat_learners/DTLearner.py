@@ -78,18 +78,21 @@ class DTLearner(object):
         
         Parameters:
         points: A numpy array with each row corresponding to a specific query
-
         Returns: the estimated values according to the saved model
         """
         pass
 
-        
+
     def get_learner_info(self):
         print ("Info about this Decision Tree Learner:")
         print ("leaf_size =", self.leaf_size)
         if self.tree is not None:
             print ("tree shape =", self.tree.shape)
-            print ("tree as a numpy ndarray: \n", self.tree)
+            print ("tree as a matrix: \n", self.tree)
+            # Create a dataframe from tree for a user-friendly view
+            df_tree = pd.DataFrame(self.tree, columns=["factor", "split_val", "left", "right"])
+            df_tree.index.name = "node"
+            print (df_tree)
         else:
             print ("Tree has no data")
 
