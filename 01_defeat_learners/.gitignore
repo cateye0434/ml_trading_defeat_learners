@@ -102,7 +102,6 @@ ENV/
 .mypy_cache/
 
 # others
-grading.py
-grade_best4.py
-testbest4.py
 points.txt
+performance.txt
+comments.txt
