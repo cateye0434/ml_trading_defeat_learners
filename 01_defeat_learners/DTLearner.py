@@ -147,7 +147,7 @@ class DTLearner(object):
         print ("leaf_size =", self.leaf_size)
         if self.tree is not None:
             print ("tree shape =", self.tree.shape)
-            print ("tree as a matrix: \n", self.tree)
+            print ("tree as a matrix:")
             # Create a dataframe from tree for a user-friendly view
             df_tree = pd.DataFrame(self.tree, columns=["factor", "split_val", "left", "right"])
             df_tree.index.name = "node"
@@ -157,7 +157,7 @@ class DTLearner(object):
 
 
 if __name__=="__main__":
-    print ("This is a Decision Tree Learner")
+    print ("This is a Decision Tree Learner\n")
 
     # Some data to test the DTLearner
     x0 = np.array([0.885, 0.725, 0.560, 0.735, 0.610, 0.260, 0.500, 0.320])
@@ -168,10 +168,11 @@ if __name__=="__main__":
     y = np.array([4.000, 5.000, 6.000, 5.000, 3.000, 8.000, 7.000, 6.000])
 
     # Create a tree learner from given train X and y
-    dtl = DTLearner(verbose=True)
+    dtl = DTLearner(verbose=True, leaf_size=1)
+    print ("\nAdd data")
     dtl.addEvidence(x, y)
 
-    # Create a tree learner from an existing tree
+    print ("\nCreate another tree learner from an existing tree")
     dtl2 = DTLearner(tree=dtl.tree)
 
     # dtl2 should have the same tree as dtl
@@ -183,5 +184,5 @@ if __name__=="__main__":
     dtl2.tree[0] = np.arange(dtl2.tree.shape[1])
     assert np.any(dtl.tree != dtl2.tree)
 
-    # Querry data with dummy data
+    # Query with dummy data
     dtl.query(np.array([[1, 2, 3], [0.2, 12, 12]]))
